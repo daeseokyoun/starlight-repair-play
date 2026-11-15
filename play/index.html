@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <link rel="icon" href="TemplateData/favicon.ico">
+  <title>Starlight Repair · 별빛 수리점</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#101827;color:#d1dfdd;font-family:system-ui,'Malgun Gothic',sans-serif}
+    main{width:min(100%,1440px,calc((100dvh - 150px) * 1.777778 + 32px));margin:auto;padding:16px}header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;font-size:14px}
+    h1{margin:0;font-size:16px;font-weight:500}header span{color:#95abae}.stage{position:relative;aspect-ratio:16/9;background:#19243a}
+    canvas{display:block;width:100%;height:100%;outline:none;image-rendering:pixelated}canvas:focus-visible{outline:2px solid #8fbab8;outline-offset:3px}
+    #loading{position:absolute;inset:0;display:grid;place-content:center;text-align:center;background:#19243a;gap:12px;pointer-events:none}#loading[hidden]{display:none}
+    #control-gate{position:absolute;inset:0;display:grid;place-content:center;background:rgba(12,20,35,.32)}#control-gate[hidden]{display:none}
+    #start-controls{border:1px solid #9dbfb9;border-radius:10px;padding:12px 20px;background:#172b37;color:#e1eeea;font:inherit;font-size:14px;cursor:pointer;box-shadow:0 8px 24px #0004}
+    #start-controls:focus-visible{outline:2px solid #c1e1d6;outline-offset:4px}#control-state{min-height:1.5em;color:#b3d9ce}
+    #end-screen{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:20px;background:linear-gradient(#041221aa,#041221dd),url('MenuHome.png') center/cover}
+    #end-screen[hidden]{display:none}.end-card{max-width:470px;text-align:center;background:#0b2030ed;border:1px solid #55777d;border-radius:20px;padding:28px 38px;box-shadow:0 12px 30px #0005}
+    .end-card h2{font-size:clamp(20px,3vw,28px);color:#fce9ba;margin:0 0 14px}.end-card div{font-size:14px;line-height:1.8;color:#b9d5d6;white-space:pre-line}
+    #return-menu{margin-top:22px;min-height:46px;padding:10px 28px;border:1px solid #d9ae62;border-radius:12px;background:#ffda8a;color:#173345;font:inherit;font-weight:700;cursor:pointer}
+    #return-menu:disabled{opacity:.5;cursor:wait}#return-menu:focus-visible{outline:2px solid #bce6df;outline-offset:4px}
+    progress{width:240px;accent-color:#8dbeb5}p{font-size:13px;line-height:1.6;color:#a9bbbc;margin:12px 0 0}
+    @media(max-width:700px){main{padding:10px}header span{font-size:12px}}
+    .screen-tools{display:flex;gap:8px;align-items:center}.screen-tools button{font:inherit;font-size:12px;color:#cbe0d9;background:#172b37;border:1px solid #45616a;border-radius:7px;padding:7px 10px;min-height:36px;cursor:pointer}
+    details{margin-top:12px;font-size:13px;line-height:1.7;color:#a9bbbc}summary{cursor:pointer;color:#d1dfdd}details p{max-width:1000px}button:focus-visible,summary:focus-visible{outline:2px solid #ffda8a;outline-offset:3px}
+    canvas{touch-action:none;user-select:none;-webkit-user-select:none}#rotate-tip{display:none}
+    .touch-mode main{width:100%;padding:max(5px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+    .touch-mode header{margin-bottom:4px}.touch-mode .stage{width:min(100%,calc((100dvh - 50px)*16/9));margin:auto}
+    .touch-mode p{font-size:12px}.touch-mode canvas:focus-visible{outline:none}
+    .stage:fullscreen{width:100vw;height:100dvh;aspect-ratio:auto;display:flex;align-items:center;justify-content:center;background:#070d18}
+    .stage:fullscreen canvas{width:min(100vw,calc(100dvh * 16 / 9));height:min(100dvh,calc(100vw * 9 / 16));flex:none}
+    @media(orientation:portrait){.touch-mode #rotate-tip{display:block;text-align:center;color:#e7cd8b;font-size:13px;margin:6px 0}.touch-mode .stage{width:100%}}
+    @media(orientation:landscape) and (max-height:600px){.touch-mode p{display:none}.touch-mode h1{font-size:13px}.touch-mode #control-state{font-size:11px}}
+  </style>
+</head>
+<body>
+  <main>
+    <header><h1 id="game-title">별빛 수리점</h1><div class="screen-tools"><span id="control-state" role="status" aria-live="polite">우주선 준비 중</span><button id="language-toggle" type="button" aria-label="Switch language">English</button><button id="touch-toggle" type="button" aria-pressed="false">터치 조작</button><button id="fullscreen" type="button">전체 화면</button></div></header>
+    <div id="rotate-tip">가로 화면으로 돌려 주세요 · 왼쪽 조이스틱으로 이동합니다.</div>
+    <div class="stage">
+      <canvas id="unity-canvas" width="1280" height="720" tabindex="0" aria-label="서로 이어진 일곱 스테이지. 1 고요한 정박지: 고철 수집. 2 푸른 정원: 표면 세척 추가. 3 붉은 광물 지대: 여섯 기기 개별 수리 추가. 현재 구역의 전체 작업 80%에서 안내된 방향의 항로가 열립니다. 4구역은 태양풍, 5구역은 해적선, 6·7구역은 둘 다 발생합니다. 7구역을 모두 복구하면 마지막 정거장의 불이 켜집니다. 방향키 또는 WASD로 이동하고 Space로 정지합니다. S 정산소에서 자동 하역하고 E로 추진·자석·창고를 강화합니다. F로 행성 세척 궤도에 진입하며 E로 기기를 수리합니다. 상단 일시정지 버튼 또는 Esc로 메뉴를 엽니다. 새로고침 후 이어하기로 저장된 여행을 계속합니다."></canvas>
+      <div id="control-gate" hidden><button id="start-controls" type="button">클릭하여 조작 시작</button></div>
+      <div id="loading"><span id="load-label">우주선을 준비하고 있습니다</span><progress max="1" value="0" aria-label="게임 불러오기"></progress></div>
+      <section id="end-screen" hidden aria-live="polite"><div class="end-card"><h2 id="end-title">항해를 마무리하고 있어요</h2><div id="end-message"></div><button id="return-menu" type="button" disabled>메뉴로 돌아가기</button></div></section>
+    </div>
+    <p id="quick-controls">방향키 / WASD 이동 · Space 제동 · E 상호작용 · F 세척 · Esc 메뉴</p>
+    <details><summary id="guide-title">항해 안내와 저장</summary><p id="game-guide"><strong>카툰 메뉴에서 시작하거나 저장한 여행을 이어 하세요.</strong> 1~7 스테이지를 모두 선택할 수 있습니다. 고철 수집부터 행성 세척·개별 수리를 익혀 마지막 별빛 수리점을 복구하세요.<br>
+    현재 구역의 전체 작업을 80% 마치면 다음 구역 입구의 운석이 흩어져 다음 항로가 열립니다. 방향키 / WASD 이동 · <strong>Space 제동 · E 상호작용 · F 세척 궤도</strong>.<br>
+    자석은 항상 켜져 있습니다. 기본 자석은 한 번에 2개, 창고는 6개를 담습니다. 각 구역의 S 정산소에서 고철당 5코인으로 자동 정산합니다. 메인 스테이션 근처에서 E를 누르면 속도·창고·자석 카드가 열립니다. 카드를 선택해 강화하고 Esc로 닫습니다. 최대 단계 카드는 비활성화됩니다.
+    2구역부터 큰 행성의 얼룩 앞에서 멈추고 F 또는 빗자루 아이콘을 누르세요. 얼룩 위를 좌우로 쓸면 물결이 넓어지고 씻은 자리에 별이 드러납니다. F 또는 이탈 아이콘으로 나옵니다. 3구역의 고장 난 기기는 옆에서 정지한 뒤 E 또는 수리 아이콘으로 고칩니다.
+    제작 탭에서 물결 노즐(50코인)과 회수 드론(100코인)을 만드세요. 행성 궤도 밖에서 F로 노즐을 켜 분진을 씻고 고철을 모을 수 있습니다. 드론은 창고가 가득 차거나 절반 이상 찬 뒤 30초가 지나면 대신 배달합니다. 대형 화물 근처에서 E로 견인·해제하고 원래 구역의 S 정산소까지 가져가면 25코인을 받습니다. 2~7구역의 미아 로봇 옆에 멈춰 E로 3초간 충전하거나 물결로 씻어 구출하세요. 행성 세척과 시설 수리를 모두 마치면 풍차와 등불이 움직입니다.
+    4구역은 태양풍, 5구역은 해적선, 6·7구역은 둘 다 찾아옵니다. 태양풍은 귀환 스테이션 앞에 멈추면 자동 방어막이 펼쳐집니다. 방향키·스틱으로 바람이 오는 쪽을 향하세요. 해적은 처음 9초 동안 정찰합니다. 4.5유닛 안으로 다가가 E로 직접 쫓아내거나, S 정산소에서 방향을 맞추고 E 또는 방패로 막으면 20코인을 받습니다. 코인·장비·완료한 작업은 구역을 오가도 유지됩니다. <strong>상단 일시정지 · Esc / R로 메뉴를 엽니다. 진행은 자동 저장되며 새로고침 후 이어하기로 계속할 수 있습니다.</strong></p></details>
+  </main>
+  <script src="Build/Flight.loader.js"></script>
+  <script>
+    const canvas=document.getElementById('unity-canvas'),loading=document.getElementById('loading'),progress=document.querySelector('progress');
+    const gate=document.getElementById('control-gate'),startButton=document.getElementById('start-controls'),controlState=document.getElementById('control-state');
+    const languageToggle=document.getElementById('language-toggle');
+    let english=true;
+    try { const saved=localStorage.getItem('starlight-language'); if(saved)english=saved==='en'; } catch {}
+    const requestedLanguage=new URLSearchParams(location.search).get('lang');
+    if(requestedLanguage==='en'||requestedLanguage==='ko')english=requestedLanguage==='en';
+    const koreanGuide=document.getElementById('game-guide').textContent;
+    const englishGuide='Restore seven connected sectors through salvage, surface washing and equipment repair. Start from Sector 1 for the full journey; Sector Select starts a new journey with equipment levels matching the sector. Your magnet is always active. Carry scrap to the S depot and stop to unload; each piece earns 5 coins. Press E near the main station to open the Speed, Cargo and Magnet cards. Select a card to upgrade; maximum-level cards are disabled. Escape closes the cards. From Sector 2, stop near a stained planet and press F to enter its washing orbit, move left/right to sweep, then F to leave. From Sector 3, stop beside damaged equipment and press E to repair. Cleaning a surface earns 15 coins, repairing a facility earns 25, and restoring a sector earns 50. Upgraded equipment speeds up repairs. Complete 80% of a sector to open its next passage; return any time to finish restoring it. For solar wind (Sectors 4, 6, 7), stop at the home station and aim toward the sun marker for 3 seconds. Craft a wake nozzle (50 coins) or courier (100 coins) at the main station. Outside a planet orbit, F toggles an owned nozzle to clear local dust and gather loose scrap. The courier collects full cargo, or half-full cargo after 30 seconds. Press E near large containers to attach or release a tow; bring them to their original S depot for 25 coins each. Stop beside stranded robots in Sectors 2–7 and press E to charge for 3 seconds, or wash them with the nozzle. Clean every surface and repair every facility to start the habitat turbine and drifting lights. Pirates (Sectors 5–7) scout for 9 seconds. Fly within 4.5 units and press E to shoo them, or stop at the S depot, press E to arm the shield, and aim toward the pirate. A successful defense earns 20 coins; theft is limited to 30% of your balance (minimum 5, maximum 60, never exceeding your balance). Progress saves automatically in this browser. Use Continue after returning; browser data clearing or private browsing may remove saves. Web and Android saves are separate. Menu: arrows / Tab, Enter / Space, Esc to go back.';
+    const L=(ko,en)=>english?en:ko;
+    function applyLanguage(send=true){
+      document.documentElement.lang=english?'en':'ko';document.title=L('별빛 수리점 · 일곱 항로','Starlight Repair · Seven Sectors');
+      document.getElementById('game-title').textContent=L('별빛 수리점','Starlight Repair');languageToggle.textContent=english?'한국어':'English';
+      document.getElementById('fullscreen').textContent=L('전체 화면','Full screen');
+      document.getElementById('rotate-tip').textContent=L('가로 화면으로 돌려 주세요 · 조이스틱으로 이동합니다.','Rotate to landscape · use the joystick to fly.');
+      document.getElementById('quick-controls').textContent=L('방향키 / WASD 이동 · Space 제동 · E 상호작용 · F 세척 · Esc 메뉴','WASD / arrows to fly · Space brake · E interact · F wash · Esc menu');
+      document.getElementById('guide-title').textContent=L('항해 안내와 저장','Flight guide & saving');document.getElementById('game-guide').textContent=english?englishGuide:koreanGuide;
+      canvas.setAttribute('aria-label',english?englishGuide:koreanGuide);
+      progress.setAttribute('aria-label',L('게임 불러오기','Loading game'));
+      startButton.textContent=L('클릭하여 조작 계속','Click to continue');returnMenu.textContent=L('메뉴로 돌아가기','Return to menu');
+      if(!engineReady||!runtimeReady)document.getElementById('load-label').textContent=L('우주선을 준비하고 있습니다','Preparing your spacecraft');
+      applyTouchMode();updateState();
+      try{localStorage.setItem('starlight-language',english?'en':'ko');}catch{}
+      if(send&&engineReady&&runtimeReady)window.unityFlight.SendMessage(shipTarget,'SetLanguage',english?'en':'ko');
+    }
+    const keyNames={Tab:'Tab · 메뉴 탐색',ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',KeyW:'W',KeyA:'A',KeyS:'S',KeyD:'D',Space:'Space · 제동',KeyE:'E · 강화·수리',KeyF:'F · 궤도 진입·이탈',KeyR:'R · 메뉴',Escape:'Esc · 메뉴'};
+    const pressed=new Set();let engineReady=false,runtimeReady=false,controlsActive=false,ending=false;
+    const endScreen=document.getElementById('end-screen'),endTitle=document.getElementById('end-title'),endMessage=document.getElementById('end-message'),returnMenu=document.getElementById('return-menu');
+    returnMenu.addEventListener('click',()=>location.reload());
+    const touchToggle=document.getElementById('touch-toggle');let touchMode=matchMedia('(pointer:coarse)').matches;
+    function applyTouchMode(){document.body.classList.toggle('touch-mode',touchMode);touchToggle.setAttribute('aria-pressed',String(touchMode));touchToggle.textContent=touchMode?L('키보드 조작','Keyboard'):L('터치 조작','Touch controls');if(engineReady&&runtimeReady)window.unityFlight.SendMessage(shipTarget,'SetTouchControls',touchMode?'1':'0');}
+    function updateState(){controlState.textContent=document.getElementById('starlight-cinematic')?L('별빛 수리점 · 영상','Starlight Repair · Film'):ending?L('항해 종료','Journey saved'):!engineReady||!runtimeReady?L('우주선 준비 중','Preparing ship'):!controlsActive?(gate.hidden?L('별빛 수리점 · 메뉴','Starlight Repair · Menu'):L('화면을 눌러 계속','Click to continue')):touchMode?L('조이스틱 · 제동 · 작업','Joystick · brake · interact'):pressed.size?(english?'Flying · '+[...pressed].map(key=>key.replace('Key','')).join(' + '):'입력 중: '+[...pressed].map(key=>keyNames[key]).join(' + ')):L('조작 중 · 방향키 / WASD','Ready · WASD / arrows');}
+    function ready(){if(!engineReady||!runtimeReady)return;loading.hidden=true;gate.hidden=true;applyLanguage();}
+    const shipTarget='Repair spacecraft · original arms and magnet bar';
+    applyLanguage(false);
+    languageToggle.addEventListener('click',()=>{english=!english;applyLanguage();});
+    window.addEventListener('starlight-flight-language',event=>{english=event.detail.english;applyLanguage(false);});
+    touchToggle.addEventListener('click',()=>{touchMode=!touchMode;applyTouchMode();updateState();});
+    document.getElementById('fullscreen').addEventListener('click',async()=>{try{await document.querySelector('.stage').requestFullscreen();if(touchMode&&screen.orientation?.lock)await screen.orientation.lock('landscape');}catch{}if(engineReady&&runtimeReady)startControls();});
+    canvas.addEventListener('contextmenu',event=>event.preventDefault());
+    canvas.addEventListener('pointercancel',()=>pauseControls());
+    window.addEventListener('orientationchange',()=>pauseControls());
+    function startControls(){if(ending||!engineReady||!runtimeReady)return;controlsActive=true;gate.hidden=true;canvas.focus({preventScroll:true});window.unityFlight.SendMessage(shipTarget,'SetBrowserFocus','1');updateState();}
+    function pauseControls(){if(ending||!engineReady||!runtimeReady)return;controlsActive=false;pressed.clear();window.unityFlight.SendMessage(shipTarget,'SetBrowserFocus','0');gate.hidden=false;startButton.textContent=L('클릭하여 조작 계속','Click to continue');updateState();}
+    gate.addEventListener('click',startControls);canvas.addEventListener('pointerdown',startControls);
+    canvas.addEventListener('focus',()=>{if(!controlsActive)startControls();});
+    canvas.addEventListener('blur',pauseControls);window.addEventListener('blur',pauseControls);
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseControls();});
+    window.addEventListener('keydown',event=>{
+      if(!(event.code in keyNames)||!controlsActive)return;
+      event.preventDefault();
+      if(!pressed.has(event.code)){
+        pressed.add(event.code);updateState();
+        // Physical key position survives Korean IME (key='Process', keyCode=229).
+        // Send only the first keydown; Unity owns the single interaction target.
+        if(event.code==='KeyE'&&!event.repeat)window.unityFlight.SendMessage(shipTarget,'QueueBrowserInteraction','1');
+        if(event.code==='KeyF'&&!event.repeat)window.unityFlight.SendMessage(shipTarget,'QueueBrowserOrbit','1');
+      }
+    },true);
+    window.addEventListener('keyup',event=>{if(pressed.delete(event.code))updateState();},true);
+    window.addEventListener('starlight-flight-ready',()=>{runtimeReady=true;ready();});
+    window.addEventListener('starlight-flight-exit-error',()=>{
+      if(engineReady&&runtimeReady)window.unityFlight.SendMessage(shipTarget,'CancelBrowserExit','1');
+    });
+    window.addEventListener('starlight-flight-exit',async event=>{
+      if(ending)return;
+      ending=true;controlsActive=false;pressed.clear();gate.hidden=true;endScreen.hidden=false;
+      endTitle.textContent=L('항해를 마무리하고 있어요','Finishing your journey');languageToggle.disabled=true;
+      touchToggle.disabled=true;document.getElementById('fullscreen').disabled=true;updateState();
+      try{
+        await window.unityFlight.Quit();
+        window.unityFlight=null;engineReady=runtimeReady=false;canvas.style.visibility='hidden';
+        endTitle.textContent=L('오늘의 항해를 마쳤어요','Safe travels, little repairer');
+        endMessage.textContent=event.detail.hasSave?L('진행을 저장했어요. 이 탭을 닫아도 괜찮아요.\n다음에 이어하기로 다시 만나요.','Your journey is saved. You can close this tab.\nChoose Continue next time to return.'):L('이 탭을 닫아도 괜찮아요.\n다음에 다시 별빛 수리점에서 만나요.','You can close this tab.\nSee you again at Starlight Repair.');
+        endScreen.dataset.state='complete';
+      }catch{
+        endTitle.textContent=L('이 탭을 닫아 종료해 주세요','Close this tab to exit');
+        endMessage.textContent=event.detail.hasSave?L('진행은 저장했어요. 다음에 이어하기로 다시 만나요.','Progress is saved. Choose Continue next time.'):L('다음에 다시 별빛 수리점에서 만나요.','See you again at Starlight Repair.');
+        endScreen.dataset.state='close-tab';
+      }
+      returnMenu.disabled=false;returnMenu.focus();
+    });
+    createUnityInstance(canvas,{
+      dataUrl:'Build/Flight.data.unityweb',frameworkUrl:'Build/Flight.framework.js.unityweb',codeUrl:'Build/Flight.wasm.unityweb',
+      streamingAssetsUrl:'StreamingAssets',companyName:'StarlightRepair',productName:'별빛 수리점',productVersion:'0.1.37',devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),
+      showBanner:(message,type)=>{if(type==='error'){document.getElementById('load-label').textContent=message;loading.hidden=false;}}
+    },amount=>{progress.value=amount;}).then(instance=>{window.unityFlight=instance;engineReady=true;ready();})
+      .catch(error=>{document.getElementById('load-label').textContent=L('실행 중 오류가 발생했습니다: ','Unable to start the game: ')+error;console.error(error);});
+  </script>
+
+</body>
+</html>
+
+

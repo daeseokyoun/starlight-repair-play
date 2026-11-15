@@ -1,0 +1,37 @@
+STARLIGHT REPAIR 0.1.37 — WEB REVIEW BUILD
+
+Upload the entire contents of this folder to a static HTTPS host or an HTML game host.
+index.html must be at the web root. Do not open the HTML directly with file://.
+The Build/*.unityweb files use Unity's decompression fallback; keep their names unchanged.
+Keep StreamingAssets/Cinematics/ and all three MP4 files. Serve MP4 as video/mp4;
+HTTP byte-range support is recommended. New Game plays a clean 10-second opening.
+Sector 7 completion plays the 15-second reopening; completing every sector plays
+the 15-second Home at Last true ending. Simultaneous completion uses the true ending.
+Esc, Space or Skip advances. Saved completed journeys do not replay their films.
+For a host serving in an iframe, allow scripts, WebGL, fullscreen, audio and local storage.
+Use ?lang=en to select English explicitly. Korean remains available from the menu or header.
+
+Controls: WASD / arrows to fly, Space to brake, E to interact, F to wash, Esc for menu.
+At the main station, open Craft tools: the wake nozzle costs 50 coins and the courier 100.
+Away from a planet orbit, F toggles an owned nozzle to clear dust and gather loose scrap.
+The courier collects full cargo, or half-full cargo after 30 seconds, and delivers it for you.
+Use E near large containers to attach/release a tow; bring them to their S depot for 25 coins.
+Stop near stranded robots in sectors 2–7 and press E to charge for 3 seconds, or wash them.
+Clean every surface and repair every facility to start the habitat turbine and drifting lights.
+Pirates scout for 9 seconds before approaching. Get within 4.5 units and press E to shoo them,
+or use the original directional S-depot shield. Either successful defense earns 20 coins.
+Menus: arrows or Tab / Shift+Tab, Enter or Space, Esc to go back.
+Touch controls can be enabled in the page header. Landscape is recommended.
+
+Start from Sector 1 for the full journey. Sector Select begins a fresh journey and asks
+before replacing an existing save. Direct sector starts use matching equipment levels
+(sector 1: level 1; sector 7: level 7). Saves retain their own equipment levels.
+Cleaning earns 15 coins per surface, repairs 25, and each first sector restoration 50.
+Pirates take 30% (minimum 5, maximum 60, never more than your balance); defense earns 20.
+Saves belong to this browser and origin; clearing
+site data or using private browsing can remove them. Web and Android saves are separate.
+
+This package is prepared for review. It is not evidence of public hosting or submission.
+Before entering: verify the public URL from a logged-out browser, create a gameplay-video
+download link, review rights and AI disclosures, and complete the official entry form.
+Third-party asset license notices are included in Licenses/.
