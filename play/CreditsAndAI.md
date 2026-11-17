@@ -1,6 +1,6 @@
 # Credits and AI usage evidence
 
-Updated 2026-11-15 for 0.1.37. This is an evidence inventory, not a claim that every asset in the shipping build has been audited. Retain the source licenses with distributed materials where applicable.
+Updated 2026-11-18 for Web 0.1.38. Creator: **BigTin**, individual entrant; creative direction, selection and release decisions. The AI/art contributions remain those documented for 0.1.37; 0.1.38 changes touch-hint wording only. This is an evidence inventory, not a claim that every asset in the shipping build has been audited. Retain the source licenses with distributed materials where applicable.
 
 ## Verified in this repository
 
@@ -29,7 +29,7 @@ The final sentence is for the creator to review before submitting. Add other too
 
 ## Before final submission
 
-- Fill in the creator/team display names and the roles they want credited.
+- Creator display name and individual status confirmed as BigTin on 2026-11-18.
 - Check that the final build's dependent assets match this inventory, including packages, plugins, shaders, and any newer assets added after this review.
 - Preserve image-generation provenance and review the applicable tool terms for the actual account used at creation.
 - Keep third-party reference screenshots in development documentation separate from the game and promotional exports. `Docs/ArtReview/SpaceReferences/` contains visual references, which are not established as distributable game art by this inventory.

@@ -138,7 +138,7 @@
     });
     createUnityInstance(canvas,{
       dataUrl:'Build/Flight.data.unityweb',frameworkUrl:'Build/Flight.framework.js.unityweb',codeUrl:'Build/Flight.wasm.unityweb',
-      streamingAssetsUrl:'StreamingAssets',companyName:'StarlightRepair',productName:'별빛 수리점',productVersion:'0.1.37',devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),
+      streamingAssetsUrl:'StreamingAssets',companyName:'StarlightRepair',productName:'별빛 수리점',productVersion:'0.1.38',devicePixelRatio:Math.min(window.devicePixelRatio||1,1.5),
       showBanner:(message,type)=>{if(type==='error'){document.getElementById('load-label').textContent=message;loading.hidden=false;}}
     },amount=>{progress.value=amount;}).then(instance=>{window.unityFlight=instance;engineReady=true;ready();})
       .catch(error=>{document.getElementById('load-label').textContent=L('실행 중 오류가 발생했습니다: ','Unable to start the game: ')+error;console.error(error);});

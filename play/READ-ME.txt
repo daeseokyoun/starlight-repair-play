@@ -1,4 +1,4 @@
-STARLIGHT REPAIR 0.1.37 — WEB REVIEW BUILD
+STARLIGHT REPAIR 0.1.38 — WEB REVIEW BUILD
 
 Upload the entire contents of this folder to a static HTTPS host or an HTML game host.
 index.html must be at the web root. Do not open the HTML directly with file://.
